@@ -1,0 +1,89 @@
+<div class="my-5" id="formulario">
+
+  <center><h1><b>+UPCH</b></h1></center>
+  <hr>
+  <div class="card-body">
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+    <%= devise_error_messages! %>
+    <div class="row card-body" >
+      <div class="col-md-6 col-md-offset-3 mx-auto">
+        <%= f.label :nombre, "Nombre(s)" %><br />
+        <%= f.text_field :nombre, autofocus: true, autocomplete: "nombre", class:'form-control',placeholder: 'Nombre' %>
+      </div>
+      <div class="col-md-6 col-md-offset-3">
+        <%= f.label :apellido_paterno %><br />
+        <%= f.text_field :apellido_paterno, autofocus: true, autocomplete: "apellido_paterno", class:'form-control', placeholder:'Apellido Paterno' %>
+      </div>
+
+
+    </div>
+
+    <!--   SEGUNDA PARTE -->
+
+    <div class="row card-body">
+      <div class="col-md-6 col-md-offset-3">
+        <%= f.label :apellido_materno %>
+        <%= f.text_field :apellido_materno, autofocus: true, autocomplete: "apellido_materno", class:'form-control', placeholder:'apellido_materno'%>
+      </div>
+      
+      
+      <div class="col-md-6 col-md-offset-3">
+        <%= f.label :sexo %><br>
+        <%= f.select :sexo, options_for_select([["Femenino ", "Femenino"], ["Masculino ", "Masculino"]]), class: 'form-control'%>
+      </div>
+    </div>
+
+    <!-- TERCERA PARTE -->
+
+    <div class="row card-body">
+      <div class="col-md-6 col-md-offset-3 mx-auto">
+        <%= f.label :fecha_nacimiento %>
+        <%= f.date_field :fecha_nacimiento, autofocus: true, autocomplete: "fecha_nacimiento", class:'form-control', placeholder:'Fecha de fecha_nacimiento'%>
+      </div> 
+      <div class="col-md-6 col-md-offset-3">
+        <%= f.label :fecha_ingreso_universidad %>
+        <%= f.date_field :fecha_ingreso_universidad, autofocus: true, autocomplete: "fecha_ingreso_universidad", class:'form-control', placeholder:'Fecha de Ingeso a la Universidad' %>
+      </div>
+
+    </div>
+
+    <!-- CUARTA PARTE -->
+    <div class="row card-body">
+      <div class="form-group col-md-6 col-md-offset-3">
+        <%= f.label :numero_trabajador %>
+        <%= f.text_field :numero_trabajador, autofocus: true, autocomplete: "numero_trabajador", class:'form-control', placeholder: 'Número de trabajador' %>
+      </div>
+      <div class="col-md-6 col-md-offset-3">
+        <%= f.label :email %><br />
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", class:'form-control', placeholder:'Correo' %>
+      </div>
+
+      
+    </div>
+
+    <!--- QUINTA PARTE--> 
+    <div class="row card-body">
+
+
+      <!--- QUINTA PARTE--> 
+      <div class="row card-body">
+        <div class="form-group col-md-6 col-md-offset-3">
+          <%= f.label :password %>
+          <% if @minimum_password_length %>
+
+          <% end %><br />
+          <%= f.password_field :password, autocomplete: "new-password",class:'form-control', placeholder:'6 caracteres minimo' %>
+        </div>  
+        <div class="form-group col-md-6 col-md-offset-3">
+
+         <%= f.label :password_confirmation%>
+         <%= f.password_field :password_confirmation, autocomplete: "new-password", class: 'form-control ', placeholder: 'Confirmar Contraseña' %>
+       </div>
+     </div>
+   </div>
+   <center><%= f.submit "Registrar" , class:'btn btn-success btn-lg'%>
+    <% end %><br>
+    <h5><%= render "devise/shared/links" %></h5><br>
+  </center>
+</div>
+<br>

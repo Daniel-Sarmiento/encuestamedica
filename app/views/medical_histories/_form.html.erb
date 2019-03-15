@@ -1,0 +1,15 @@
+<%= form_with(model: medical_history, local: true) do |f| %>
+  <% if medical_history.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(medical_history.errors.count, "error") %> prohibited this medical_history from being saved:</h2>
+      <ul>
+      <% medical_history.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <div class="actions">
+    <%= f.submit 'Solicitar cita' %>
+  </div>
+<% end %>

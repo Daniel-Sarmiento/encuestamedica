@@ -1,0 +1,22 @@
+	<% if @notifications_list.size > 0 %>
+		<h3>
+			<b>NOTIFICACIONES</b>
+		</h3>
+		<br>
+		<% @notifications_list.each do |n| %>
+		<div class="card" style="width: 100%;">
+			<div class="card-body">
+				<h5 class="card-title"> <%= n.titulo %> </h5>
+				<p class="card-text"><%= n.mensaje %></p>
+				<%= link_to 'Eliminar', notificaciones_destroy_path(n.id), :method => 'delete', class: "text-danger" %>
+				<% if current_user.is_doctor? %>
+				<%= link_to 'Ver lista de espera', lista_pacientes_en_espera_path, class: "ml-2 text-dark" %>
+				<% end %>
+			</div>
+		</div>
+		<br>
+		<%end %>
+	<% else %>
+	<br>
+	<center><h1>Sin notificaciones</h1></center>
+<% end %>

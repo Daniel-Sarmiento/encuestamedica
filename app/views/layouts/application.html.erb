@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PlusUPCH</title>
+    <%= csrf_meta_tags %>
+
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+
+  <% if @fondo_all_page %>
+  <body id="fondo_all_pages">
+  <% else %>
+   <% alert_static = true %>
+   <body id="fondo_login">
+  <%end%>
+
+    <% if @enable_navigation %>
+    <%= render 'partials/navigation' %>
+    <% end %>
+
+    <div class="container">
+      <div class="top-space"></div>
+      <% if alert != nil %>
+       <% if @fondo_all_page %>
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <% else %>
+          <div class="alert alert-danger alert-dismissible fade show myAlert-top" role="alert">
+        <%end%>
+          <strong><%= alert %></strong>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+       <%end%>
+      <% if notice != nil %>
+       <% if @fondo_all_page %>
+       <div class="alert alert-dismissible alert-primary">
+        <% else %>
+          <div class="alert alert-primary alert-dismissible fade show myAlert-top" role="alert">
+        <%end%>
+          <strong><%= notice %></strong>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      <%end%>
+
+      <%= yield %>
+    
+    </div>
+  </body>
+</html>

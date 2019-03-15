@@ -1,0 +1,84 @@
+<H1>
+	Cuestionario
+</H1>
+
+
+<div id="surveyElement"></div>
+<div id="surveyResult"></div>
+<div id="botones" class="btn-group btn-group-xs" 
+role="group" arial-label="grupo">
+</div>
+
+<script type="text/javascript">
+	
+	var json = {
+		questions: [
+		{
+			name: "name",
+			type: "text",
+			title: "Departamento donde trabaja:",
+			placeHolder: "Departamento",
+			isRequired: true
+		},{
+			name: "job",
+			type: "text",
+			title: "Ocupacion:",
+			placeHolder: "Ocupacion",
+			isRequired: true
+		},{
+			name: "school",
+			type: "text",
+			title: "Escolaridad:",
+			placeHolder: "Departamento",
+			isRequired: true
+		}, {
+			name: "contat",
+			type: "text",
+			title: "Tipo de contrato:",
+			placeHolder: "Tipo de contrato",
+			isRequired: true
+		},{
+			name: "state",
+			type: "text",
+			title: "Estado civil",
+			placeHolder: "Estado civil",
+			isRequired: true
+		},{
+			name: "birthdate",
+			type: "text",
+			inputType: "date",
+			title: "Your birthdate:",
+			isRequired: true
+		}, {
+			name: "color",
+			type: "text",
+			inputType: "color",
+			title: "Your favorite color:"
+		}, {
+			name: "email",
+			type: "text",
+			inputType: "email",
+			title: "Your e-mail:",
+			placeHolder: "jon.snow@nightwatch.org",
+			isRequired: true,
+			validators: [
+			{
+				type: "email"
+			}
+			]
+		}
+		]
+	};
+
+	window.survey = new Survey.Model(json);
+
+	survey
+	.onComplete
+	.add(function (result) {
+		document
+		.querySelector('#surveyResult')
+		.innerHTML = "result: " + JSON.stringify(result.data);
+	});
+
+	$("#surveyElement").Survey({model: survey});
+</script>

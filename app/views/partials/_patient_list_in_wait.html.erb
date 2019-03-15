@@ -1,0 +1,1482 @@
+<script src="https://surveyjs.azureedge.net/1.0.59/survey.jquery.js"></script>
+<link href="https://surveyjs.azureedge.net/1.0.59/survey.css" type="text/css" rel="stylesheet"/>
+
+<div style="float: left; display: inline;"> 
+  <h3>Lista de espera</h3>
+</div>
+<div style="float: right; display: inline;">
+  <%= form_tag '/search/patients', class: 'form-inline', method: :get do %>
+  <div class="form-group mx-sm-3 mb-2">
+    <%= text_field_tag :keyword, nil, placeholder: 'Buscar', class: 'form-control' %>
+  </div>
+  <%= content_tag :button, class: 'btn btn-primary mb-3', type: :submit do %>
+  Buscar
+  <% end %>
+  <% end %>
+</div>
+<table class="table table-bordred table-responsive-md table-hover table-sm">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Nombre</th>
+      <th scope="col">Apellido</th>
+      <th scope="col">Correo</th>
+      <th scope="col">Datos</th>
+      <th scope="col">Aceptar</th>
+      <th scope="col">Rechazar</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% medical_histories.each do |medical_history| %>
+    <tr>
+      <% patient = User.find(medical_history.user_id) %>
+      <th scope="row"> <%= patient.id %> </th>
+      <td><%= patient.nombre %></td>
+      <td><%= patient.apellido_paterno + ' ' + patient.apellido_materno %></td>
+      <td><%= patient.email %></td>
+      <td><button type="button" class="btn btn-warning" data-toggle="modal" data-target="#exampleModalLong" data-whatever = '<%=medical_history.respuestas_parte_uno.html_safe%> '>Datos</button></td>
+      <td><button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal" data-id="<%=patient.id%>"data-whatever="<%= patient.nombre %>">Aceptar</button></td>
+      <td><button type="button" class="btn btn-danger" data-toggle="modal" data-target="#rejectModal" data-id="<%=patient.id%>" data-whatever="<%=patient.nombre%>">Rechazar</button></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+<%= will_paginate @medical_histories, list_classes: %w(pagination justify-content-center) %>
+<div class="modal fade " id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Notificar aceptación a </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <%= form_tag '/notification/new', method: :post do %>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="date" class="col-form-label">Agendar cita:</label>
+            <%= hidden_field_tag :titulo, nil, id: 'titulo' %>
+            <!--<input type="datetime-local" class="form-control" id="date">-->
+            <%= datetime_field_tag :fecha_citada, nil, id: 'recipient-name' %>
+            <%= hidden_field_tag :asunto, nil, id: 'asunto' %>
+            <%= hidden_field_tag :user_id, nil, id: 'recipient-name' %>
+          </div>
+          <div class="form-group">
+            <label for="message-text" class="col-form-label">Mensaje:</label>
+            <%= text_area_tag :mensaje, nil, class: 'form-control', id: 'recipient-name' %>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <%= content_tag :button, class: 'btn btn-primary', type: :submit do%>
+            Enviar mensaje
+          <% end %>
+        </div>
+      <% end -%>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Enviar notificación</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <%= form_tag '/notification/new', method: :post do %>
+          <div class="form-group">
+            <%= hidden_field_tag :titulo, nil, id: 'titulo' %>
+            <%= hidden_field_tag :user_id, nil, id: 'user_id' %>
+            <%= hidden_field_tag :asunto, nil, id: 'asunto' %>
+            <%= text_area_tag :mensaje, nil, class: 'form-control', id: 'message-text' %>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+         <%= content_tag :button, class: 'btn btn-primary', type: :submit do%>
+          Enviar mensaje
+         <% end %>
+      </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="rejectModal" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Datos</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="surveyElement"></div>
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $('#exampleModal').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget) // Button that triggered the modal
+  var recipient = button.data('whatever') // Extract info from data-* attributes
+  var id = button.data('id')
+  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+  var modal = $(this)
+  modal.find('.modal-title').text('Aceptar solicitud de ' + recipient)
+  modal.find('.modal-body input').val(id)
+  modal.find('.modal-body input#asunto').val(2)
+  modal.find('.modal-body input#titulo').val('Solicitud de cita aceptada.')
+})
+$('#rejectModal').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget) // Button that triggered the modal
+  var recipient = button.data('whatever') // Extract info from data-* attributes
+  var id = button.data('id')
+  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+  var modal = $(this)
+  modal.find('.modal-title').text('Rechazar solicitud de ' + recipient)
+  modal.find('.modal-body input#user_id').val(id)
+  modal.find('.modal-body input#asunto').val(1)
+  modal.find('.modal-body input#titulo').val('Solicitud de cita rechazada.')
+})
+
+$('#exampleModalLong').on('show.bs.modal', function (event) {
+  
+  var modal = $(this)
+  var json = {
+    title: "Datos ingresados",
+    pages: [
+      { 
+        title: "Datos personales",
+          questions: [
+            {
+                name: "departamentoActual",
+                type: "text",
+                title: "Departamento en donde trabaja actualmente:",
+                placeHolder: "",
+                isRequired: true,
+            }, {
+                name: "ocupación",
+                type: "text",
+                title: "Ocupación",
+                startWithNewLine: false,
+                isRequired: true,
+            }, {
+                name: "escolaridad",
+                type: "radiogroup",
+                title: "Escolaridad:",
+                isRequired: true,
+                colCount: 3,
+                choices: [
+                  "Sin estudios",
+                  "Primaria",
+                  "Secundaria",
+                  "Técnico",
+                  "Bachillerato",
+                  "Licenciatura",
+                  "Posgrado"
+                ]
+            }, {
+                name: "turnoTrabajo",
+                type: "radiogroup",
+                title: "Turno en el que trabaja:",
+                isRequired: true,
+                colCount: 3,
+                choices: [
+                  "Matutino",
+                  "Vespertino",
+                  "mixto",
+                ]
+            }, {
+              name: "tipoContrato",
+              type: "text",
+              title: "Tipo de contrato",
+              startWithNewLine: false,
+              isRequired: true,
+            }, {
+              name: "estadoCivil",
+              type: "radiogroup",
+              title: "Estado civil",
+              colCount: 5,
+              isRequired: true,
+              choices: [
+                  "Soltero",
+                  "Casado",
+                  "U.Libre",
+                  "Viudo",
+                  "Divorciado"
+                ]
+            }
+        ] 
+    },{//Datos personales
+        title: "Estilo de vida",
+        questions: [
+            {
+                name: "practicaDeporte",
+                type: "radiogroup",
+                title: "¿Practica algún deporte, o hace ejercicio?",
+                colCount: 3,
+                isRequired: true,
+                choices: [
+                  "Diario",
+                  "Una vez por semana",
+                  "Ocasionalmente o nunca",
+                ]
+            }, {
+                name: "seDivierte",
+                type: "radiogroup",
+                title: "¿Se divierte con su familia o amigos, o asiste a algún tipo de actividad cultural?",
+                colCount: 3,
+                isRequired: true,
+                choices: [
+                  "Una vez por semana",
+                  "Una vez por mes",
+                  "Ocasionalmente o nunca",
+                ]
+            }, {
+                name: "estudiaConRegularidad",
+                type: "radiogroup",
+                title: "¿Estudia con regularidad o realiza lectura de libros técnicos/literarios?",
+                colCount: 3,
+                isRequired: true,
+                choices: [
+                  "5 ó mas horas a la semana",
+                  "5 ó mas horas  por mes",
+                  "Ocasionalmente o nunca",
+                ]
+            }, {
+                name: "consumeDroga",
+                type: "radiogroup",
+                title: "¿Consume o utiliza alguna droga (marihuana, cocaína, tachas, etc.) actualmente?",
+                colCount: 3,
+                isRequired: true,
+                choices: [
+                  "Nunca",
+                  "Una vez por año",
+                  "Más de una vez por año",
+                ]
+            }, {
+                name: "tomaBebidas",
+                type: "radiogroup",
+                title: "Actualmente ¿Toma bebidas alcohólicas (cerveza, vino, brandy, ron, etc.)?",
+                colCount: 3,
+                isRequired: true,
+                choices: [
+                  "Nunca",
+                  "Ocasionalmente (2 a 5 veces por año)",
+                  "Por lo menos una vez a la semana",
+                ]
+            }, {
+                name: "problemasPortomarBebidas",
+                type: "radiogroup",
+                title: "¿El tomar bebidas alcohólicas le ha dado algún problema en su familia o trabajo? ",
+                colCount: 3,
+                isRequired: true,
+                choices: [
+                  "Nunca",
+                  "En alguna ocasión",
+                  "Frecuentemente",
+                ]
+            }, {
+                name: "tiempoTomandoBebidas",
+                type: "radiogroup",
+                title: "¿Cuanto tiempo ha tomado bebidas alcohólicas regularmente (por lo menos una vez al mes)?",
+                colCount: 3,
+                isRequired: true,
+                choices: [
+                  "Menos de un año",
+                  "De uno a cinco años",
+                  "Más de cinco años",
+                ]
+            }, {
+                name: "fumadoCigarrillosComerciales",
+                type: "radiogroup",
+                title: "¿Ha fumado o fuma cigarrillos comerciales?",
+                colCount: 3,
+                isRequired: true,
+                choices: [
+                  "Nunca",
+                  "Menos de 2 años de mi vida",
+                  "Más de 2 años de mi vida",
+                ]
+            }, {
+                name: "cigarrosFumadoPromedio",
+                type: "radiogroup",
+                title: "¿Cuantos cigarros en promedio fuma actualmente?",
+                colCount: 3,
+                visibleIf: "{fumadoCigarrillosComerciales}='Menos de 2 años de mi vida' or {fumadoCigarrillosComerciales}='Más de 2 años de mi vida'",
+                isRequired: true,
+                choices: [
+                  "Nunca",
+                  "de 2 a 10 por día",
+                  "Más de 10 por día",
+                ]
+            },{
+              name:"comidaDiarias",
+              type:"radiogroup",
+              title: "¿En sus comidas diarias, que tipo de alimentos consume con mayor frecuencia? ",
+              colCount: 3,
+              isRequired: true,
+              choices: [
+                "Frutas, Verduras, Pescado, Pollo",
+                "Carnes rojas, Cereales",
+                "Tacos, Tortas, Comida Rapida",
+              ]
+            },{
+              name:"sexo",
+              type:"radiogroup",
+              title: "¿Cuántas parejas sexuales a tenido? ",
+              colCount: 3,
+              isRequired: true,
+              choices: [
+                "Una o ninguna",
+                "De dos a tres",
+                "Mas de tres",
+              ]
+            },{
+              name:"agresion",
+              type:"radiogroup",
+              title: "¿A sido agredido, fisica, verbalmente, culpada/o u hostilizada/o por su familia?",
+              colCount: 3,
+              isRequired: true,
+              choices: [
+                "Nunca",
+                "En una o dos ocaciones",
+                "Mas de tres ocaciones",
+              ]
+            },{
+              name:"solo_mujeres_cancer",
+              type:"radiogroup",
+              title: "Examen de cancer cervico uterino",
+              colCount: 2,
+              visibleIf: "'<%= current_user.sexo %>'='Femenino'",
+              isRequired: true,
+              choices: [
+                "Si",
+                "No",
+              ]
+            },{
+              name:"solo_mujeres_mamas",
+              type:"radiogroup",
+              title: "Exploración anual de mamas",
+              colCount: 2,
+              visibleIf: "'<%= current_user.sexo %>'='Femenino'",
+              isRequired: true,
+              choices: [
+                "Si",
+                "No",
+              ]
+            },{
+              name:"solo_mujeres_embarazo",
+              type:"radiogroup",
+              title: "Menos de dos embarazos",
+              colCount: 2,
+              visibleIf: "'<%= current_user.sexo %>'='Femenino'",
+              isRequired: true,
+              choices: [
+                "Si",
+                "No",
+              ]
+            },{ //// si SON BARRACOS MACHOS ALFA LOMO PLATEADOS QUE SE RESPETAN XD (no es machismo)
+              name:"solo_hombres_orina",
+              type:"radiogroup",
+              title: "Necesidad urgente de orinar",
+              colCount: 2,
+              visibleIf: "'<%= current_user.sexo %>'='Masculino'",
+              isRequired: true,
+              choices: [
+                "Si",
+                "No",
+              ]
+            },{ //// si SON BARRACOS MACHOS ALFA LOMO PLATEADOS QUE SE RESPETAN XD (no es machismo)
+              name:"solo_hombres_chorro",
+              type:"radiogroup",
+              title: "Dificultad al inicio ó disminución del chorro de orina",
+              colCount: 2,
+              visibleIf: "'<%= current_user.sexo %>'='Masculino'",
+              isRequired: true,
+              choices: [
+                "Si",
+                "No",
+              ]
+            },{ //// si SON BARRACOS MACHOS ALFA LOMO PLATEADOS QUE SE RESPETAN XD (no es machismo)
+              name:"solo_hombres_aumento",
+              type:"radiogroup",
+              title: "Aumento en el numero de veces que orina las 24 hrs.",
+              colCount: 2,
+              visibleIf: "'<%= current_user.sexo %>'='Masculino'",
+              isRequired: true,
+              choices: [
+                "Si",
+                "No",
+              ] 
+            }
+        ]
+      },{ 
+
+
+        title: "Antecedentes personales y familiares patológicos",
+        questions: [
+            {
+                name: "familiares_diabetes",
+                type: "radiogroup",
+                title: "¿Tiene usted families directos (padre, madre, hermanos) diabéticos?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "familiares_presion",
+                type: "radiogroup",
+                title: "¿Tiene usted families directos (padre, madre, hermanos) enfermos de la presión?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "mayor_peso",
+                type: "radiogroup",
+                title: "¿Tiene mas de 5 Kilos arriba de su preso ideal?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "diabetes",
+                type: "radiogroup",
+                title: "¿En los ultimos 5 años le ha diagnosticado un medico diabetes?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "corazon",
+                type: "radiogroup",
+                title: "¿En los ultimos 5 años le ha diagnosticado un medico enfermedades del corazón?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "lumbalgia_ciatica",
+                type: "radiogroup",
+                title: "¿En los ultimos 5 años le ha diagnosticado un medico lumbalgica, lumbago o ciatica",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "gastritis",
+                type: "radiogroup",
+                title: "¿En los ultimos 5 años le ha diagnosticado un medico gastritis, ulcera o colitis nerviosa?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "asma",
+                type: "radiogroup",
+                title: "¿En los ultimos 5 años le ha diagnosticado un medico bronquitis aguda, cronica o asma?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "tuberculosis",
+                type: "radiogroup",
+                title: "¿En los ultimos 5 años le ha diagnosticado un medico diagnosticado tuberculosis?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "enfermedades_transmision_sexual",
+                type: "radiogroup",
+                title: "¿En los ultimos 5 años le ha diagnosticado un medico enfermedades de transmision sexual ?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "sordera",
+                type: "radiogroup",
+                title: "¿En los ultimos 5 años le ha diagnosticado un medico diagnosticado sordera, vértigo o alteracion del equilibrio?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "depresion",
+                type: "radiogroup",
+                title: "¿En los ultimos 5 años le ha diagnosticado un medico neurosis, trastornos de anseiedad o depresion?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "otras_enfermedades",
+                type: "text",
+                title: "Otras enfermedades:",
+                placeHolder: "",
+                isRequired: false,
+            }
+        ]
+    },{ /// ANTECEDENTES PATOLOGICOS
+        title: "IV CAPACITACIÓN",
+        questions: [
+            {
+                name: "curso_induccion",
+                type: "radiogroup",
+                colCount: 2,
+                title: "¿Su empresa proporciona cursos de inducción al puesto a usted y al personal de nuevo ingreso?",
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "capacitacion_personal",
+                type: "radiogroup",
+                title: "¿Su empresa capacita al personal y a ud. cada vez que cambia de puesto?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "intrucciones_tareas",
+                type: "radiogroup",
+                title: "¿cuando se le ordena una tarea recibe instrucciones para hacerla?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "capacitacion_trabajo_periodica",
+                type: "radiogroup",
+                title: "¿Periódicamente es enviado a capacitación por su trabajo?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "capacitacion_area_interes",
+                type: "radiogroup",
+                title: "¿Se le capacita en otras áreas o temas de su interes?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "ocupacional_higiene",
+                type: "radiogroup",
+                title: "¿Ha recibido capacitacion en salud ocupacional y/o seguridad de higiene?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "capacitacion_autocuidado",
+                type: "radiogroup",
+                title: "¿ha recibido capacitación para el autocuidado de su salud?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "salud_opcional_programa",
+                type: "radiogroup",
+                title: "¿En su empresa existe un programa educativo en salud opcional?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            }
+        ]
+    },{ /// EXPOSICION EN EL MEDIO AMBIENTE DE TRABAJO
+        title: "V. EXPOSICIÓN EN EL MEDIO AMBIENTE DE TRABAJO EN SU PUESTO DE TRABAJO ESTA USTED  EXPUESTO DE MANERA EXCESIVA O CONSTANTE A:",
+        questions: [
+            {
+                name: "ruido",
+                type: "radiogroup",
+                title: "Ruido",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "vibracion",
+                type: "radiogroup",
+                title: "Vibración",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "iluminacion",
+                type: "radiogroup",
+                title: "Falta de iluminación",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "temperatura_extrema",
+                type: "radiogroup",
+                title: "Temperatura extrema",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "radiaciones",
+                type: "radiogroup",
+                title: "Radiaciones",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "polvo",
+                type: "radiogroup",
+                title: "Polvos",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "humo",
+                type: "radiogroup",
+                title: "Humo",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "gases",
+                type: "radiogroup",
+                title: "Gases o vapores",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "liquidos",
+                type: "radiogroup",
+                title: "Liquidos (disolventes o acidos)",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "biologos",
+                type: "radiogroup",
+                title: "Biologicos(Virus, bacterias, hongos)",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            }
+        ]
+    },{ /// ANTECEDENTES PATOLOGICOS
+        title: "VI. PSICOSOCIALES CONTENIDO DEL TRABAJO EL DESARROLLO DE SU ACTIVIDAD LABORAL ACTUAL LE CONDICIONA: ",
+        questions: [
+            {
+                name: "trabajo_monotono",
+                type: "radiogroup",
+                title: "Un trabajo monótono",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "falta_autonomia_desiciones",
+                type: "radiogroup",
+                title: "Falta de autonomia en sus decisiones",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "tarea_dificil",
+                type: "radiogroup",
+                title: "Tareas dificiles",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "funciones_ambiguas",
+                type: "radiogroup",
+                title: "Funciones ambiguas (poco espedificas)",
+                isRequired: true,
+                colCount: 2,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "vinculacion_tareas",
+                type: "radiogroup",
+                title: "Poca vinculación entre su tarea y sus habilidades y destrezas",
+                isRequired: true,
+                colCount: 2,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "insatisfaccion_tarea",
+                type: "radiogroup",
+                title: "insatisfacción en el desarrollo de sus tareas",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "sobrecarga_trabajo",
+                type: "radiogroup",
+                title: "Sobrecarga de trabajo",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            }
+        ]
+    },{ /// RELACIONES HUMANAS
+        title: "REALCIONES HUMANAS 'EN SU TRABAJO ACTUAL EXISTE",
+        questions: [
+            {
+                name: "comunicacion_jefe",
+                type: "radiogroup",
+                colCount: 2,
+                title: "Mucha Dificultad para comunicarse con sus jefes",
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "trato_jefe",
+                type: "radiogroup",
+                colCount: 2,
+                title: "Un trato no cordial con su jefe",
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "tabajo_aislado",
+                type: "radiogroup",
+                colCount: 2,
+                title: "Trabaja islado (solo)",
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "supervisores",
+                type: "radiogroup",
+                title: "Malos supervisores",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "trato_despotico",
+                type: "radiogroup",
+                title: "Trato despótico",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "relacion_personal_companeros",
+                type: "radiogroup",
+                title: "Malas relaciones personales con sus compañeros",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            }
+        ]
+    },{ /// ANTECEDENTES PATOLOGICOS
+        title: "ORGANIZACIÓN DEL TIEMPO SU TRABAJO ACTUAL LO OBLIGA A REALIZAR",
+        questions: [
+            {
+                name: "jornadas_prolongadas",
+                type: "radiogroup",
+                title: "Jornadas prolongadas",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "rotacion_turnos",
+                type: "radiogroup",
+                title: "Rotación de turnos",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "horas_extra",
+                type: "radiogroup",
+                title: "Horas extras",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "trabajo_noche",
+                type: "radiogroup",
+                title: "Trabajo de noche",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "descanso_jornada",
+                type: "radiogroup",
+                colCount: 2,
+                title: "Ausensia de descansos durante la jornada laboral",
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "doble_turno",
+                type: "radiogroup",
+                title: "Doble turno",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "poco_descanzo_casa",
+                type: "radiogroup",
+                title: "Poco descanso en su domicilio",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "trabajo_apresurado",
+                type: "radiogroup",
+                title: "Trabajo apresurado",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            }
+        ]
+    },{ /// ANTECEDENTES PATOLOGICOS
+        title: "ADMINISTRACIÓN DE LA EMPRESA Y ATENCIÓN AL PERSONAL EN SU EMPRESA EXISTE:",
+        questions: [
+            {
+                name: "manuales_claro",
+                type: "radiogroup",
+                title: "Manuales claros de actividades o funciones para cada trabajo",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "rotacion_puesto_cargos",
+                type: "radiogroup",
+                title: "Rotación de puestos, cargos o tareas",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "plan_asensso",
+                type: "radiogroup",
+                title: "Un plan de ascenso en base a meritos",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "salario_justo",
+                type: "radiogroup",
+                title: "Salario que sastifacen las necesidades basicas del trabajor",
+                isRequired: true,
+                colCount: 2,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "estabilidad_laboral",
+                type: "radiogroup",
+                title: "Estabilidada laboral (Seguridad en su trabajo)",
+                isRequired: true,
+                colCount: 2,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "programas_recreacion",
+                type: "radiogroup",
+                title: "Programas de recreación que incluyan a su familia",
+                isRequired: true,
+                colCount: 2,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "programa_vivienda",
+                type: "radiogroup",
+                title: "Programas de apoyo para conseguir vivienda",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "becas_educacion_familia",
+                type: "radiogroup",
+                title: "Becas o apoyo para la educación de su familia",
+                isRequired: true,
+                colCount: 2,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "servicio_salud",
+                type: "Servicio de salud para la familia",
+                title: "",
+                isRequired: true,
+                colCount: 2,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "reconocimiento_desempeno",
+                type: "radiogroup",
+                title: "Reconocimiento al desempeño de desempeño en su trabajo",
+                isRequired: true,
+                colCount: 2,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "facilidad_permiso",
+                type: "radiogroup",
+                title: "Facilidad para obtener permisos",
+                isRequired: true,
+                colCount: 2,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "jefes_flexibles",
+                type: "radiogroup",
+                title: "Jefes flexibles con su horario laboral",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "supervisores_apoyo",
+                type: "radiogroup",
+                title: "Supervisores que dan apoyo y facilitan su trabajo",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "jefes_aciertos",
+                type: "radiogroup",
+                title: "Jefes que buscan aciertos en vez de fallas",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            }
+        ]
+    },{ /// ANTECEDENTES PATOLOGICOS
+        title: "VII ERGONÓMICOS SU PUESTO DE TRABAJO LO OBLIGA A TENER:",
+        questions: [
+            {
+                name: "postura",
+                type: "radiogroup",
+                title: "Postura inadecuada",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "sobreesfuerzos",
+                type: "radiogroup",
+                title: "Sobreesfuerzos",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "movimiento_forzado",
+                type: "radiogroup",
+                title: "Movimiento forzado",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "estiramiento_dimensiones",
+                type: "radiogroup",
+                title: "Estiramiento por dimensiones inadecuadas del área o equipo",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "mala_distribucion",
+                type: "radiogroup",
+                title: "Mala distribuación del espacio",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "desorganizacion",
+                type: "radiogroup",
+                title: "Desorganización del trabajo",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "trabajo_pie",
+                type: "radiogroup",
+                title: "Trabajo prolongado de pie",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "trabajo_sentado",
+                type: "radiogroup",
+                title: "trabajo prolongado sentado",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "trabajo_cuclillas",
+                type: "radiogroup",
+                title: "Trabajo prolongado en cluclillas u otras posiciones",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+              name: "otras_posiciones",
+              type: "text",
+              title: "Otros. Espedifique",
+              isRequired: false
+            }
+        ]
+    },{ /// ANTECEDENTES PATOLOGICOS
+        title: "VIII MECANICOS/ELECTRICOS EN SU LUGAR DE TRABAJO EXISTEN:",
+        questions: [
+            {
+                name: "herramientas",
+                type: "radiogroup",
+                title: "Herramientas defectuosas",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "maquinaria",
+                type: "radiogroup",
+                title: "Maquinaria sin protección",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "equipo",
+                type: "radiogroup",
+                title: "Equipo defecuoso o sin protección",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "vehiculo",
+                type: "radiogroup",
+                title: "Vehiculos en mal estado",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "electricidad_alta_tencion",
+                type: "radiogroup",
+                title: "Peligros por electricidad alta tención",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "peligo_radiaciones",
+                type: "radiogroup",
+                title: "Peligros por electricidad radiaciones",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "incendio",
+                type: "radiogroup",
+                title: "Peligro de incendio",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "explociones",
+                type: "radiogroup",
+                title: "Peligro de explosiones",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "otros_explosiones",
+                type: "radiogroup",
+                title: "Otros espedifique",
+                colCount: 2,
+                isRequired: false,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            }
+
+        ]
+    },{ /// ANTECEDENTES PATOLOGICOS
+        title: "VIII DEL AMBIENTE EN SUS ÁREAS DE TRABAJO EXISTE",
+        questions: [
+            {
+                name: "senales",
+                type: "radiogroup",
+                title: "Falta de señalizacion sobre los procesos o peligros",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "orden_aseo",
+                type: "radiogroup",
+                title: "Falta de orden y aseo",
+                isRequired: true,
+                colCount: 2,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "alamcenamiento_materiales",
+                type: "radiogroup",
+                title: "Almacenamiento de materiales o maquinaria inadecuado",
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "superficie_trabajo",
+                type: "radiogroup",
+                title: "Superficie de trabajo defecuosas",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "escalera",
+                type: "radiogroup",
+                title: "Escaleras o escalas defectuosas",
+                isRequired: true,
+                colCount: 2,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "andamios",
+                type: "radiogroup",
+                title: "Adamios inseguros",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "techos",
+                type: "radiogroup",
+                title: "Techos defectuosos",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "equip_inadecuado",
+                type: "radiogroup",
+                title: "Estiba de material o equpos inadecuadas",
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "cargas_trabadas",
+                type: "radiogroup",
+                title: "Cargas no trabadas",
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "cargas_muro",
+                type: "radiogroup",
+                title: "Cargas apoyadas en muro",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "otros_areas_trabajo",
+                type: "text",
+                title: "Otros: Especifique",
+                isRequired: false,
+
+            }
+        ]
+    },{ /// ANTECEDENTES PATOLOGICOS
+        title: "AUSENTISMO",
+        questions: [
+            {
+                name: "falta_trabajo",
+                type: "radiogroup",
+                title: "¿Falto a su trabajo el año pasado?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "incapcito",
+                type: "radiogroup",
+                title: "¿Se incapacito por alguna enfermedad general el año pasado?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "accidente",
+                type: "radiogroup",
+                title: "¿Sufrio algun accidente de trabajo el año pasado?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            },{
+                name: "incapacito_accidente",
+                type: "radiogroup",
+                title: "¿se incapacuti oir nas de 7 días (por enfermedad general) el año pasado?",
+                colCount: 2,
+                isRequired: true,
+                choices: [
+                  "Si",
+                  "No",
+                ]
+            }
+        ]
+    }
+  ]
+};
+
+window.survey = new Survey.Model(json);
+  var button = $(event.relatedTarget)
+  var str = button.data('whatever')
+  console.log(str)
+  survey.data = JSON.parse(str);
+  survey.mode = 'display';
+  $("#surveyElement").Survey({model: survey}); 
+
+})
+
+
+</script>

@@ -1,0 +1,28 @@
+<div class="row">
+  <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+    <div class="card card-signin my-5">
+      <div class="card-body">
+        <h5 class="card-title text-center">+UPCH</h5>
+        <%= form_for(resource, as: resource_name, url: session_path(resource_name), class: 'form-signin' ) do |f| %>
+        <div class="form-group">
+          <%= f.email_field :email, required: true, autofocus: true, autocomplete: "email", class: 'form-control', placeholder: 'Correo electrónico' %>
+        </div>
+
+        <div class="form-group">
+          <%= f.password_field :password, required: true, autocomplete: "current-password", class: 'form-control', placeholder: 'Contraseña'%>
+        </div>
+
+        <div class="custom-control custom-checkbox mb-3">
+          <% if devise_mapping.rememberable? -%>
+          <%= f.check_box :remember_me, class:'form-check-input' %>
+          <%= f.label :Recordarme, class: 'form-check-label' %>
+          <% end -%>
+        </div>
+        <%= f.button 'Iniciar Sesíon', type: :submit, class: 'btn btn-lg btn-primary btn-block text-uppercase' %>
+        <% end %>
+        <br>
+        <%= link_to 'Crear cuenta', new_user_registration_path %>
+      </div>
+    </div>
+  </div>
+</div>

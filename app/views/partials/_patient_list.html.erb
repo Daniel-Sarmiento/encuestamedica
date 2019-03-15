@@ -1,0 +1,39 @@
+
+<div class="col-md-12"> 
+  <div style="float: left; display: inline;"> 
+    <h3>Historiales</h3><br>
+  </div>
+  <div style="float: right; display: inline;">
+    <%= form_tag '/search/create', class: 'form-inline', method: :get do %>
+    <div class="form-group mx-sm-3 mb-2">
+      <%= text_field_tag :keyword, nil, placeholder: 'Buscar', class: 'form-control' %>
+    </div>
+    <%= content_tag :button, class: 'btn btn-primary mb-3', type: :submit do %>
+    Buscar
+    <% end %>
+    <% end %>
+  </div>
+</div>
+<table class="table table-bordred table-hover table-sm">
+  <thead>
+    <tr>
+      <th scope="col">#T</th>
+      <th scope="col">Nombre</th>
+      <th scope="col">Apellido</th>
+      <th scope="col">Correo</th>
+      <th scope="col">Historial</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% patients.each do |patient| %>
+    <tr>
+      <th><%= patient.numero_trabajador %> </th>
+      <td><%= patient.nombre %></td>
+      <td><%= patient.apellido_paterno + ' ' + patient.apellido_materno %></td>
+      <td><%= patient.email %></td>
+      <td><button disabled="true" class="btn btn-warning"> Historial </button></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+<%= will_paginate @patients, list_classes: %w(pagination justify-content-center) %>
