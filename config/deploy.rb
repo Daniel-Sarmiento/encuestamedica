@@ -2,7 +2,7 @@
 lock "~> 3.11.0"
 
 set :application, "encuestamedica"
-set :repo_url, "git@github.com:Daniel-Sarmiento/encuestamedica.git"
+set :repo_url, "https://github.com/Daniel-Sarmiento/encuestamedica.git"
 
 # Default branch is :master
 # ask :branch, `git rev-parse --abbrev-ref HEAD`.chomp

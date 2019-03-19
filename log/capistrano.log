@@ -1,0 +1,27 @@
+# Logfile created on 2019-03-19 12:01:39 -0600 by logger.rb/56438
+  INFO ---------------------------------------------------------------------------
+  INFO START 2019-03-19 12:01:39 -0600 cap production deploy
+  INFO ---------------------------------------------------------------------------
+ DEBUG [a6583fa5] Running [ -d $HOME/.rbenv/versions/2.6.1 ] as deploy@plusupch.ddns.net
+ DEBUG [a6583fa5] Command: [ -d $HOME/.rbenv/versions/2.6.1 ]
+ DEBUG [862d201e] Finished in 9.680 seconds with exit status 0 (successful).
+ DEBUG [2aba9649] Running /usr/bin/env which passenger as deploy@plusupch.ddns.net
+ DEBUG [2aba9649] Command: /usr/bin/env which passenger
+ DEBUG [ca5f5bbb] 	/usr/bin/passenger
+ DEBUG [ca5f5bbb] Finished in 0.783 seconds with exit status 0 (successful).
+  INFO [82e35f0b] Running /usr/bin/env mkdir -p /tmp as deploy@plusupch.ddns.net
+ DEBUG [82e35f0b] Command: ( export RBENV_ROOT="$HOME/.rbenv" RBENV_VERSION="2.6.1" ; /usr/bin/env mkdir -p /tmp )
+  INFO [cb116751] Finished in 4.445 seconds with exit status 0 (successful).
+ DEBUG Uploading /tmp/git-ssh-encuestamedica-production-Daniel Sarmiento.sh 0.0%
+  INFO Uploading /tmp/git-ssh-encuestamedica-production-Daniel Sarmiento.sh 100.0%
+  INFO [a720a1d1] Running /usr/bin/env chmod 700 /tmp/git-ssh-encuestamedica-production-Daniel\ Sarmiento.sh as deploy@plusupch.ddns.net
+ DEBUG [a720a1d1] Command: ( export RBENV_ROOT="$HOME/.rbenv" RBENV_VERSION="2.6.1" ; /usr/bin/env chmod 700 /tmp/git-ssh-encuestamedica-production-Daniel\ Sarmiento.sh )
+  INFO [33eee92b] Finished in 1.632 seconds with exit status 0 (successful).
+  INFO [c480edb7] Running /usr/bin/env git ls-remote git@github.com:Daniel-Sarmiento/encuestamedica.git HEAD as deploy@plusupch.ddns.net
+ DEBUG [c480edb7] Command: ( export RBENV_ROOT="$HOME/.rbenv" RBENV_VERSION="2.6.1" GIT_ASKPASS="/bin/echo" GIT_SSH="/tmp/git-ssh-encuestamedica-production-Daniel Sarmiento.sh" ; /usr/bin/env git ls-remote git@github.com:Daniel-Sarmiento/encuestamedica.git HEAD )
+ DEBUG [41af02ec] 	Warning: Permanently added 'github.com,192.30.253.112' (RSA) to the list of known hosts.
+ DEBUG [41af02ec] 	git@github.com: Permission denied (publickey).
+ DEBUG [41af02ec] 	fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
