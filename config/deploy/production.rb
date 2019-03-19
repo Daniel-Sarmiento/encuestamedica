@@ -7,6 +7,8 @@
 # server "example.com", user: "deploy", roles: %w{app web}, other_property: :other_value
 # server "db.example.com", user: "deploy", roles: %w{db}
 
+server "plusupch.ddns.net", user: "deploy", roles: %w{app db webbundle  exec rails secret}
+
 
 
 # role-based syntax
@@ -59,4 +61,3 @@
 #     auth_methods: %w(publickey password)
 #     # password: "please use keys"
 #   }
-server '187.157.24.151', port: 4200, user: 'deploy', roles: %w{web app db} 
