@@ -13,8 +13,8 @@ development:
   <<: *default
   adapter: mysql2
   database: upchdb
-  username: ruby
-  password: $Roberto141189
+  username: root
+  password: Roberto@14111989
   host: 127.0.0.1
   socket: /tmp/mysql.sock
   port: 3306
@@ -32,8 +32,8 @@ production:
   <<: *default
   adapter: mysql2
   database: upchdb
-  username: ruby
-  password: $Roberto141189
+  username: root
+  password: Roberto@14111989
   host: 172.0.0.1
   socket: /tmp/mysql.sock
   port: 3306
